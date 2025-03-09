@@ -1,13 +1,5 @@
 // Cloudflare Worker for Generate Dialogue
 // Using ElevenLabs for TTS instead of OpenAI
-import { ElevenLabsClient, play } from "elevenlabs";
-
-const openaiApiKey = env.OPENAI_API_KEY;
-const elevenLabsApiKey = env.ELEVENLABS_API_KEY;
-
-const elevenlabs = new ElevenLabsClient({
-	apiKey: elevenLabsApiKey,
-});
 
 const SYSTEM_PROMPT = `
 Eres un generador de frases cortas para un mitin político ecuatoriano.
@@ -37,128 +29,28 @@ Prompt Maestro:
 
 const voiceDatabase = [
 	{
-		"id": "9BWtsMINqrJLrRacOk9x",
-		"name": "Aria",
-		"gender": "Female",
-		"accent": "spanish"
+		voice_id: 'qyrGJ30fywarSl4a3pNp',
+		name: 'Milli- Calm Narrator',
+		gender: 'female',
 	},
 	{
-		"id": "CwhRBWXzGAHq8TQ4Fs17",
-		"name": "Roger",
-		"gender": "Male",
-		"accent": "spanish"
+		voice_id: 'dF1Qg3iMRirscWEMtEKb',
+		name: 'Diego Cárdenas',
+		gender: 'male',
 	},
 	{
-		"id": "EXAVITQu4vr4xnSDxMaL",
-		"name": "Sarah",
-		"gender": "Female",
-		"accent": "spanish"
+		voice_id: '9EU0h6CVtEDS6vriwwq5',
+		name: 'Young & Soft Latin Female Voice',
+		gender: 'female',
 	},
 	{
-		"id": "FGY2WhTYpPnrIDTdsKH5",
-		"name": "Laura",
-		"gender": "Female",
-		"accent": "spanish"
+		voice_id: 'tomkxGQGz4b1kE0EM722',
+		name: 'Mario',
+		gender: 'male',
 	},
-	{
-		"id": "IKne3meq5aSn9XLyUdCD",
-		"name": "Charlie",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "JBFqnCBsd6RMkjVDRZzb",
-		"name": "George",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "N2lVS1w4EtoT3dr4eOWO",
-		"name": "Callum",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "SAz9YHcvj6GT2YYXdXww",
-		"name": "River",
-		"gender": "Neutral/Non-Binary",
-		"accent": "spanish"
-	},
-	{
-		"id": "TX3LPaxmHKxFdv7VOQHJ",
-		"name": "Liam",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "XB0fDUnXU5powFXDhCwa",
-		"name": "Charlotte",
-		"gender": "Female",
-		"accent": "spanish"
-	},
-	{
-		"id": "Xb7hH8MSUJpSbSDYk0k2",
-		"name": "Alice",
-		"gender": "Female",
-		"accent": "spanish"
-	},
-	{
-		"id": "XrExE9yKIg1WjnnlVkGX",
-		"name": "Matilda",
-		"gender": "Female",
-		"accent": "spanish"
-	},
-	{
-		"id": "bIHbv24MWmeRgasZH58o",
-		"name": "Will",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "cgSgspJ2msm6clMCkdW9",
-		"name": "Jessica",
-		"gender": "Female",
-		"accent": "spanish"
-	},
-	{
-		"id": "cjVigY5qzO86Huf0OWal",
-		"name": "Eric",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "iP95p4xoKVk53GoZ742B",
-		"name": "Chris",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "nPczCjzI2devNBz1zQrb",
-		"name": "Brian",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "onwK4e9ZLuTAKqWW03F9",
-		"name": "Daniel",
-		"gender": "Male",
-		"accent": "spanish"
-	},
-	{
-		"id": "pFZP5JQG7iQjIQuC4Bku",
-		"name": "Lily",
-		"gender": "Female",
-		"accent": "spanish"
-	},
-	{
-		"id": "pqHfZKP75CvOlQylNhV4",
-		"name": "Bill",
-		"gender": "Male",
-		"accent": "spanish"
-	}
 ]
 
-async function getPhrase() {
+async function getPhrase(openaiApiKey) {
 	const response = await fetch('https://api.openai.com/v1/chat/completions', {
 		method: 'POST',
 		headers: {
@@ -186,7 +78,7 @@ async function getPhrase() {
 	return phrase;
 }
 
-async function generateAudio(text, voice = "Paulo") {
+async function generateAudio(text, elevenLabsApiKey, voice = "Paulo") {
     const options = {
         method: 'POST',
         headers: {
@@ -207,8 +99,11 @@ async function generateAudio(text, voice = "Paulo") {
 
 export default {
 	async fetch(request, env) {
-		const phrase = await getPhrase()
-		const audio = await generateAudio(phrase)
+		const openaiApiKey = env.OPENAI_API_KEY;
+		const elevenLabsApiKey = env.ELEVENLABS_API_KEY;
+
+		const phrase = await getPhrase(openaiApiKey)
+		const audio = await generateAudio(phrase, elevenLabsApiKey, "Paulo")
 
 		return new Response(audio, {
 			headers: {
