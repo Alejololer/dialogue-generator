@@ -87,7 +87,7 @@ async function getPhrase(openaiApiKey) {
 	return phrase;
 }
 
-async function generateAudio(text, elevenLabsApiKey, voice_id = 'dF1Qg3iMRirscWEMtEKb') {
+async function generateAudio(text, elevenLabsApiKey, voice_id = "qyrGJ30fywarSl4a3pNp") {
 	const options = {
 		method: 'POST',
 		headers: {
@@ -96,13 +96,12 @@ async function generateAudio(text, elevenLabsApiKey, voice_id = 'dF1Qg3iMRirscWE
 		},
 		body: JSON.stringify({
 			text,
-			voice_id,
 			model_id: 'eleven_multilingual_v2',
 			output_format: 'mp3_44100_128',
 		}),
 	};
 
-	const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb?output_format=mp3_44100_128', options);
+	const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}?output_format=mp3_44100_128`, options);
 	return await response.body;
 }
 
@@ -112,6 +111,8 @@ export default {
 		const elevenLabsApiKey = env.ELEVENLABS_API_KEY;
 
 		const randomVoice = getRandomVoice(voiceDatabase);
+
+		console.log(randomVoice);
 
 		const phrase = await getPhrase(openaiApiKey);
 		const audio = await generateAudio(phrase, elevenLabsApiKey, randomVoice.voice_id);
