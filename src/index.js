@@ -50,6 +50,15 @@ const voiceDatabase = [
 	},
 ];
 
+function getRandomVoice(database) {
+	if (!database || database.length === 0) {
+		return null; // Return null if the database is empty or undefined.
+	}
+
+	const randomIndex = Math.floor(Math.random() * database.length);
+	return database[randomIndex];
+}
+
 async function getPhrase(openaiApiKey) {
 	const response = await fetch('https://api.openai.com/v1/chat/completions', {
 		method: 'POST',
@@ -78,7 +87,7 @@ async function getPhrase(openaiApiKey) {
 	return phrase;
 }
 
-async function generateAudio(text, elevenLabsApiKey, voice = 'Paulo') {
+async function generateAudio(text, elevenLabsApiKey, voice_id = 'dF1Qg3iMRirscWEMtEKb') {
 	const options = {
 		method: 'POST',
 		headers: {
@@ -87,7 +96,7 @@ async function generateAudio(text, elevenLabsApiKey, voice = 'Paulo') {
 		},
 		body: JSON.stringify({
 			text,
-			voice,
+			voice_id,
 			model_id: 'eleven_multilingual_v2',
 			output_format: 'mp3_44100_128',
 		}),
@@ -102,8 +111,10 @@ export default {
 		const openaiApiKey = env.OPENAI_API_KEY;
 		const elevenLabsApiKey = env.ELEVENLABS_API_KEY;
 
+		const randomVoice = getRandomVoice(voiceDatabase);
+
 		const phrase = await getPhrase(openaiApiKey);
-		const audio = await generateAudio(phrase, elevenLabsApiKey, 'Paulo');
+		const audio = await generateAudio(phrase, elevenLabsApiKey, randomVoice.voice_id);
 
 		return new Response(audio, {
 			headers: {
